@@ -17,7 +17,6 @@ class AcGamePlayground {
     }
 
     show() {
-        console.log("dshfsh");
         this.$playground.show();
         this.root.$ac_game.append(this.$playground);
         this.width = this.$playground.width();

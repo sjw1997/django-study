@@ -44,7 +44,8 @@ class AcGameMenu {
     hide() {
         this.$menu.hide();
     }
-}let AC_GAME_OBJECTS = [];
+}
+let AC_GAME_OBJECTS = [];
 
 class AcGameObject {
     constructor() {
@@ -399,7 +400,6 @@ class AcGamePlayground {
     }
 
     show() {
-        console.log("dshfsh");
         this.$playground.show();
         this.root.$ac_game.append(this.$playground);
         this.width = this.$playground.width();
