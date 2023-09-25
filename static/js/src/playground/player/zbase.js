@@ -118,7 +118,7 @@ class Player extends AcGameObject {
         if (this.damage_speed > 10) {
             this.vx = this.vy = 0;
             this.move_length = 0;
-            const damage_moved = this.speed * this.timedelta / 1000;
+            const damage_moved = this.damage_speed * this.timedelta / 1000;
             this.x += this.damage_vx * damage_moved;
             this.y += this.damage_vy * damage_moved;
             this.damage_speed *= this.friction;
