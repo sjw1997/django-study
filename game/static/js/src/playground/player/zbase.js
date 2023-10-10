@@ -16,7 +16,7 @@ class Player extends AcGameObject {
         this.is_me = is_me;
         this.spent_time = 0;
         this.ctx = this.playground.game_map.ctx;
-        this.eps = 0.1;
+        this.eps = 0.01;
         this.friction = 0.9;
 
         this.cur_skill = null;
@@ -31,8 +31,8 @@ class Player extends AcGameObject {
         if (this.is_me) {
             this.add_listening_events();
         } else {
-            const tx = Math.random() * this.playground.width;
-            const ty = Math.random() * this.playground.height;
+            const tx = Math.random() * this.playground.width / this.playground.scale;
+            const ty = Math.random() * this.playground.height / this.playground.scale;
             this.move_to(tx, ty);
         }
     }
@@ -46,10 +46,10 @@ class Player extends AcGameObject {
             // e.clientX返回的是绝对坐标，我们这里要的是相对于canvas的相对坐标
             const rect = outer.ctx.canvas.getBoundingClientRect();
             if (e.which === 3) {
-                outer.move_to(e.clientX - rect.left, e.clientY - rect.top);
+                outer.move_to((e.clientX - rect.left) / outer.playground.scale, (e.clientY - rect.top) / outer.playground.scale);
             } else if (e.which === 1) {
                 if (outer.cur_skill === "fireball") {
-                    outer.shoot_fireball(e.clientX - rect.left, e.clientY - rect.top);
+                    outer.shoot_fireball((e.clientX - rect.left) / outer.playground.scale, (e.clientY - rect.top) / outer.playground.scale);
                 }
 
                 outer.cur_skill = null;
@@ -65,13 +65,13 @@ class Player extends AcGameObject {
 
     shoot_fireball(tx, ty) {
         const x = this.x, y = this.y;
-        const radius = this.playground.height * 0.01;
+        const radius = 0.01;
         const angle = Math.atan2(ty - y, tx - x);
         const vx = Math.cos(angle), vy = Math.sin(angle);
         const color = "orange";
-        const speed = this.playground.height * 0.5;
-        const move_length = this.playground.height * 1;
-        const damage = this.playground.height * 0.01;
+        const speed = 0.5;
+        const move_length = 1;
+        const damage = 0.01;
         new FireBall(this.playground, this, x, y, radius, vx, vy, color, speed, move_length, damage);
     }
 
@@ -101,17 +101,22 @@ class Player extends AcGameObject {
         }
 
         this.radius -= damage;
-        if (this.radius < 10) {
+        if (this.radius < this.eps) {
             this.destroy();
             return false;
         }
         this.damage_vx = Math.cos(angle);
         this.damage_vy = Math.sin(angle);
-        this.damage_speed = damage * 200;
+        this.damage_speed = damage * 100;
         this.speed *= 0.8;
     }
 
     update() {
+        this.update_move();
+        this.render();
+    }
+
+    update_move() {  // 更新玩家移动
         this.spent_time += this.timedelta / 1000;
         if (this.spent_time > 5 && !this.is_me && Math.random() < 1.0 / 300) {
             const player = this.playground.players[Math.floor(Math.random() * this.playground.players.length)];
@@ -120,7 +125,7 @@ class Player extends AcGameObject {
             }
         }
 
-        if (this.damage_speed > 10) {
+        if (this.damage_speed > this.eps) {
             this.vx = this.vy = 0;
             this.move_length = 0;
             const damage_moved = this.damage_speed * this.timedelta / 1000;
@@ -132,8 +137,8 @@ class Player extends AcGameObject {
                 this.move_length = 0;
                 this.vx = this.vy = 0;
                 if (!this.is_me) {
-                    const tx = Math.random() * this.playground.width;
-                    const ty = Math.random() * this.playground.height;
+                    const tx = Math.random() * this.playground.width / this.playground.scale;
+                    const ty = Math.random();
                     this.move_to(tx, ty);
                 }
             } else {
@@ -143,21 +148,21 @@ class Player extends AcGameObject {
                 this.move_length -= moved;
             }
         }
-        this.render();
     }
 
     render() {
+        const scale = this.playground.scale;
         if (this.is_me) {
             this.ctx.save();
             this.ctx.beginPath();
-            this.ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+            this.ctx.arc(this.x * scale, this.y * scale, this.radius * scale, 0, Math.PI * 2);
             this.ctx.stroke();
             this.ctx.clip();
-            this.ctx.drawImage(this.img, this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
+            this.ctx.drawImage(this.img, (this.x - this.radius) * scale, (this.y - this.radius) * scale, this.radius * 2 * scale, this.radius * 2 * scale);
             this.ctx.restore();
         } else {
             this.ctx.beginPath();
-            this.ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            this.ctx.arc(this.x * scale, this.y * scale, this.radius * scale, 0, Math.PI * 2);
             this.ctx.fillStyle = this.color;
             this.ctx.fill();
         }

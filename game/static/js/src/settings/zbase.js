@@ -32,9 +32,8 @@ class Settings {
         </div>
         <br>
         <div class="ac-game-settings-acwing">
-            <img width="30" src="https://iamsjw.com/django_static/image/settings/acwing_logo.png">
-            <br>
-            <div>AcWing一键登录</div>
+            <img width="30" src="https://wiki.connect.qq.com/wp-content/uploads/2013/10/03_qq_symbol-1-250x300.png">
+            <div>QQ账户登录</div>
         </div>
     </div>
     <div class="ac-game-settings-register">
@@ -63,12 +62,6 @@ class Settings {
         </div>
         <div class="ac-game-settings-option">
             登录
-        </div>
-        <br>
-        <div class="ac-game-settings-acwing">
-            <img width="30" src="https://iamsjw.com/django_static/image/settings/acwing_logo.png">
-            <br>
-            <div>AcWing一键登录</div>
         </div>
     </div>
 </div>
