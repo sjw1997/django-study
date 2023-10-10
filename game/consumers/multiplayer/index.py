@@ -21,9 +21,10 @@ class MultiPlayer(AsyncWebsocketConsumer):
         if not cache.has_key(self.room_name):
             cache.set(self.room_name, [], 3600)  # 有效期1小时
 
+        # 将房间内已有的玩家发送给这位新建立连接的玩家
         for player in cache.get(self.room_name):
             await self.send(text_data=json.dumps({
-                'event': 'create_payer',
+                'event': 'create_player',
                 'uuid': player['uuid'],
                 'username': player['username'],
                 'photo': player['photo'],

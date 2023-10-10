@@ -16,14 +16,10 @@ class MultiPlayerSocket {
             const data = JSON.parse(e.data);
             const uuid = data.uuid;
             if (uuid === this.uuid) return false;
-            console.log(uuid, this.uuid);
-
             const event = data.event;
             if (event === "create_player") {
                 this.receive_create_player(uuid, data.username, data.photo);
             }
-
-            console.log(data);
         };
     }
 
