@@ -28,10 +28,11 @@ class AcGameMenu {
         let outer = this;
         this.$single_mode.click(function () {
             outer.hide();
-            outer.root.playground.show();
+            outer.root.playground.show("single mode");
         });
         this.$multi_mode.click(function () {
-            console.log("click multi mode");
+            outer.hide();
+            outer.root.playground.show("multi mode");
         });
         this.$settings.click(function () {
             console.log("click settings");
@@ -54,6 +55,17 @@ class AcGameObject {
         AC_GAME_OBJECTS.push(this);
         this.has_called_start = false;  // 是否执行过start函数
         this.timedelta = 0;  // 当前帧距离上一帧的时间间隔，毫秒
+        this.uuid = this.create_uuid();
+    }
+
+    create_uuid() {
+        let res = "";
+        for (let i = 0; i < 8; i ++ ) {
+            const x = parseInt(Math.floor(Math.random() * 10));
+            res = res + x;
+
+        }
+        return res;
     }
 
     start() {  // 只会在第一帧执行一次
@@ -171,7 +183,7 @@ class Particle extends AcGameObject {
     }
 }
 class Player extends AcGameObject {
-    constructor(playground, x, y, radius, color, speed, is_me) {
+    constructor(playground, x, y, radius, color, speed, character, username, photo) {
         super();
         this.playground = playground;
         this.x = x;
@@ -185,7 +197,9 @@ class Player extends AcGameObject {
         this.radius = radius;
         this.color = color;
         this.speed = speed;
-        this.is_me = is_me;
+        this.character = character;
+        this.username = username;
+        this.photo = photo;
         this.spent_time = 0;
         this.ctx = this.playground.game_map.ctx;
         this.eps = 0.01;
@@ -193,16 +207,16 @@ class Player extends AcGameObject {
 
         this.cur_skill = null;
 
-        if (this.is_me) {
+        if (this.character !== "robot") {
             this.img = new Image();
-            this.img.src = this.playground.root.settings.photo;
+            this.img.src = this.photo;
         }
     }
 
     start() {
-        if (this.is_me) {
+        if (this.character === "me") {
             this.add_listening_events();
-        } else {
+        } else if (this.character === "robot") {
             const tx = Math.random() * this.playground.width / this.playground.scale;
             const ty = Math.random() * this.playground.height / this.playground.scale;
             this.move_to(tx, ty);
@@ -290,7 +304,7 @@ class Player extends AcGameObject {
 
     update_move() {  // 更新玩家移动
         this.spent_time += this.timedelta / 1000;
-        if (this.spent_time > 5 && !this.is_me && Math.random() < 1.0 / 300) {
+        if (this.spent_time > 5 && this.character === "robot" && Math.random() < 1.0 / 300) {
             const player = this.playground.players[Math.floor(Math.random() * this.playground.players.length)];
             if (player !== this) {
                 this.shoot_fireball(player.x, player.y);
@@ -308,7 +322,7 @@ class Player extends AcGameObject {
             if (this.move_length < this.eps) {
                 this.move_length = 0;
                 this.vx = this.vy = 0;
-                if (!this.is_me) {
+                if (this.character === "robot") {
                     const tx = Math.random() * this.playground.width / this.playground.scale;
                     const ty = Math.random();
                     this.move_to(tx, ty);
@@ -324,7 +338,7 @@ class Player extends AcGameObject {
 
     render() {
         const scale = this.playground.scale;
-        if (this.is_me) {
+        if (this.character !== "robot") {
             this.ctx.save();
             this.ctx.beginPath();
             this.ctx.arc(this.x * scale, this.y * scale, this.radius * scale, 0, Math.PI * 2);
@@ -413,6 +427,60 @@ class FireBall extends AcGameObject {
         this.ctx.fill();
     }
 }
+class MultiPlayerSocket {
+    constructor(playground) {
+        this.playground = playground;
+
+        this.ws = new WebSocket("ws://82.156.1.194:8000/wss/multiplayer/");
+
+        this.start();
+    }
+
+    start() {
+        this.receive();
+    }
+
+    receive() {
+        this.ws.onmessage = (e) => {
+            const data = JSON.parse(e.data);
+            const uuid = data.uuid;
+            if (uuid === this.uuid) return false;
+            console.log(uuid, this.uuid);
+
+            const event = data.event;
+            if (event === "create_player") {
+                this.receive_create_player(uuid, data.username, data.photo);
+            }
+
+            console.log(data);
+        };
+    }
+
+    send_create_player(username, photo) {
+        this.ws.send(JSON.stringify({
+            'uuid': this.uuid,
+            'event': 'create_player',
+            'username': username,
+            'photo': photo,
+        }));
+    }
+
+    receive_create_player(uuid, username, photo) {
+        let player = new Player(
+            this.playground,
+            this.playground.width / 2 / this.playground.scale,
+            0.5,
+            0.05,
+            "white",
+            0.15,
+            "enemy",
+            username,
+            photo,
+        );
+        player.uuid = uuid;
+        this.playground.players.push(player);
+    }
+}
 class AcGamePlayground {
     constructor(root) {
         this.root = root;
@@ -428,16 +496,15 @@ class AcGamePlayground {
     }
 
     start() {
-        const outer = this;
-        $(window).resize(function(){
-            outer.resize();
+        $(window).resize(() => {
+            this.resize();
         });
     }
 
     resize() {
-        this.width = this.$playground.width();
-        this.height = this.$playground.height();
-        const unit = Math.min(this.width / 16, this.height / 9);
+        const width = this.$playground.width();
+        const height = this.$playground.height();
+        const unit = Math.min(width / 16, height / 9);
         this.width = unit * 16;
         this.height = unit * 9;
         this.scale = this.height;
@@ -447,20 +514,28 @@ class AcGamePlayground {
         }
     }
 
-    show() {
+    show(mode) {
         this.$playground.show();
 
         this.resize();
-
-        this.width = this.$playground.width();
-        this.height = this.$playground.height();
         this.game_map = new GameMap(this);
-        this.players = [];
-        this.players.push(new Player(this, this.width / 2 / this.scale, 0.5, 0.05, "white", 0.15, true));
 
-        for (let i = 0; i < 5; i ++ ) {
-            const color = this.get_random_color();
-            this.players.push(new Player(this, this.width / 2 / this.height, 0.5, 0.05, color, 0.15, false));
+
+        this.players = [];
+        this.players.push(new Player(this, this.width / 2 / this.scale, 0.5, 0.05, "white", 0.15, "me", this.root.settings.username, this.root.settings.photo));
+
+        if (mode === "single mode") {
+            for (let i = 0; i < 5; i ++ ) {
+                const color = this.get_random_color();
+                this.players.push(new Player(this, this.width / 2 / this.height, 0.5, 0.05, color, 0.15, "robot"));
+            }
+        } else if (mode === "multi mode") {
+            this.mps = new MultiPlayerSocket(this);
+            this.mps.uuid = this.players[0].uuid;
+
+            this.mps.ws.onopen = () => {
+                this.mps.send_create_player(this.root.settings.username, this.root.settings.photo);
+            };
         }
 
     }
