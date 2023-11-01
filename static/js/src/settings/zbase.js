@@ -102,22 +102,22 @@ class Settings {
 
     add_listening_events_login() {
         let outer = this;
-        this.$login_register.click(function() {
+        this.$login_register.click(function () {
             outer.register();
         });
 
-        this.$login_submit.click(function() {
+        this.$login_submit.click(function () {
             outer.login_on_remote();
         });
     }
 
     add_listening_events_register() {
         let outer = this;
-        this.$register_login.click(function() {
+        this.$register_login.click(function () {
             outer.login();
         });
         // this.$register_submit.click(this.register_on_remote);
-        this.$register_submit.click(function() {
+        this.$register_submit.click(function () {
             outer.register_on_remote();
         });
     }
@@ -129,7 +129,7 @@ class Settings {
         this.$login_error_message.empty();
 
         $.ajax({
-            url: "http://82.156.1.194:8000/settings/login/",
+            url: "https://app5415.acapp.acwing.com.cn/settings/login/",
             type: "GET",
             data: {
                 username,
@@ -149,7 +149,7 @@ class Settings {
         if (this.platform === "ACAPP") return false;
 
         $.ajax({
-            url: 'http://82.156.1.194:8000/settings/logout/',
+            url: 'https://app5415.acapp.acwing.com.cn/settings/logout/',
             type: "GET",
             success(resp) {
                 if (resp.result === 'success') {
@@ -168,7 +168,7 @@ class Settings {
         this.$register_error_message.empty();
 
         $.ajax({
-            url: 'http://82.156.1.194:8000/settings/register/',
+            url: 'https://app5415.acapp.acwing.com.cn/settings/register/',
             type: "GET",
             data: {
                 username,
@@ -198,12 +198,12 @@ class Settings {
     getinfo() {
         let outer = this;
         $.ajax({
-            url: "http://82.156.1.194:8000/settings/getinfo/",
+            url: "https://app5415.acapp.acwing.com.cn/settings/getinfo/",
             type: "GET",
             data: {
                 platform: outer.platform,
             },
-            success: function(resp) {
+            success: function (resp) {
                 if (resp.result === "success") {
                     outer.username = resp.username;
                     outer.photo = resp.photo;

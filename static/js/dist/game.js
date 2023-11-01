@@ -60,7 +60,7 @@ class AcGameObject {
 
     create_uuid() {
         let res = "";
-        for (let i = 0; i < 8; i ++ ) {
+        for (let i = 0; i < 8; i++) {
             const x = parseInt(Math.floor(Math.random() * 10));
             res = res + x;
 
@@ -93,7 +93,7 @@ class AcGameObject {
 
 
 let last_timestamp;
-let AC_GAME_ANIMATION = function(timestamp) {
+let AC_GAME_ANIMATION = function (timestamp) {
     for (const obj of AC_GAME_OBJECTS) {
         if (!obj.has_called_start) {
             obj.start();
@@ -225,10 +225,10 @@ class Player extends AcGameObject {
 
     add_listening_events() {
         let outer = this;
-        this.playground.game_map.$canvas.on("contextmenu", function(){
+        this.playground.game_map.$canvas.on("contextmenu", function () {
             return false;
         });
-        this.playground.game_map.$canvas.mousedown(function(e) {
+        this.playground.game_map.$canvas.mousedown(function (e) {
             // e.clientX返回的是绝对坐标，我们这里要的是相对于canvas的相对坐标
             const rect = outer.ctx.canvas.getBoundingClientRect();
             if (e.which === 3) {
@@ -241,7 +241,7 @@ class Player extends AcGameObject {
                 outer.cur_skill = null;
             }
         });
-        $(window).keydown(function(e) {
+        $(window).keydown(function (e) {
             if (e.which === 81) { // q
                 outer.cur_skill = "fireball";
                 return false;
@@ -275,7 +275,7 @@ class Player extends AcGameObject {
     }
 
     is_attacked(angle, damage) {
-        for (let i = 0; i < 20 + Math.random() * 10; i ++ ) {
+        for (let i = 0; i < 20 + Math.random() * 10; i++) {
             const x = this.x, y = this.y;
             const radius = this.radius * Math.random() * 0.1;
             const angle = Math.PI * 2 * Math.random();
@@ -431,7 +431,7 @@ class MultiPlayerSocket {
     constructor(playground) {
         this.playground = playground;
 
-        this.ws = new WebSocket("ws://82.156.1.194:8000/wss/multiplayer/");
+        this.ws = new WebSocket("wss://app5415.acapp.acwing.com.cn/wss/multiplayer/");
 
         this.start();
     }
@@ -521,7 +521,7 @@ class AcGamePlayground {
         this.players.push(new Player(this, this.width / 2 / this.scale, 0.5, 0.05, "white", 0.15, "me", this.root.settings.username, this.root.settings.photo));
 
         if (mode === "single mode") {
-            for (let i = 0; i < 5; i ++ ) {
+            for (let i = 0; i < 5; i++) {
                 const color = this.get_random_color();
                 this.players.push(new Player(this, this.width / 2 / this.height, 0.5, 0.05, color, 0.15, "robot"));
             }
@@ -644,22 +644,22 @@ class Settings {
 
     add_listening_events_login() {
         let outer = this;
-        this.$login_register.click(function() {
+        this.$login_register.click(function () {
             outer.register();
         });
 
-        this.$login_submit.click(function() {
+        this.$login_submit.click(function () {
             outer.login_on_remote();
         });
     }
 
     add_listening_events_register() {
         let outer = this;
-        this.$register_login.click(function() {
+        this.$register_login.click(function () {
             outer.login();
         });
         // this.$register_submit.click(this.register_on_remote);
-        this.$register_submit.click(function() {
+        this.$register_submit.click(function () {
             outer.register_on_remote();
         });
     }
@@ -671,7 +671,7 @@ class Settings {
         this.$login_error_message.empty();
 
         $.ajax({
-            url: "http://82.156.1.194:8000/settings/login/",
+            url: "https://app5415.acapp.acwing.com.cn/settings/login/",
             type: "GET",
             data: {
                 username,
@@ -691,7 +691,7 @@ class Settings {
         if (this.platform === "ACAPP") return false;
 
         $.ajax({
-            url: 'http://82.156.1.194:8000/settings/logout/',
+            url: 'https://app5415.acapp.acwing.com.cn/settings/logout/',
             type: "GET",
             success(resp) {
                 if (resp.result === 'success') {
@@ -710,7 +710,7 @@ class Settings {
         this.$register_error_message.empty();
 
         $.ajax({
-            url: 'http://82.156.1.194:8000/settings/register/',
+            url: 'https://app5415.acapp.acwing.com.cn/settings/register/',
             type: "GET",
             data: {
                 username,
@@ -740,12 +740,12 @@ class Settings {
     getinfo() {
         let outer = this;
         $.ajax({
-            url: "http://82.156.1.194:8000/settings/getinfo/",
+            url: "https://app5415.acapp.acwing.com.cn/settings/getinfo/",
             type: "GET",
             data: {
                 platform: outer.platform,
             },
-            success: function(resp) {
+            success: function (resp) {
                 if (resp.result === "success") {
                     outer.username = resp.username;
                     outer.photo = resp.photo;
