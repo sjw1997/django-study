@@ -33,9 +33,13 @@ class AcGamePlayground {
 
     show(mode) {
         this.$playground.show();
-
         this.resize();
+
+        this.mode = mode;
+        this.state = "waiting";  // waiting -> fighting -> over
         this.game_map = new GameMap(this);
+        this.notice_board = new NoticeBoard(this);
+        this.player_count = 0;
 
 
         this.players = [];
