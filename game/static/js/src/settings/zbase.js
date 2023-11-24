@@ -31,10 +31,12 @@ class Settings {
             注册
         </div>
         <br>
+        <!--
         <div class="ac-game-settings-acwing">
             <img width="30" src="https://wiki.connect.qq.com/wp-content/uploads/2013/10/03_qq_symbol-1-250x300.png">
             <div>QQ账户登录</div>
         </div>
+        -->
     </div>
     <div class="ac-game-settings-register">
         <div class="ac-game-settings-title">注册</div>
